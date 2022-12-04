@@ -106,6 +106,6 @@ func task2(input string) (score int) {
 func main() {
 	input := "input.txt"
 
-	fmt.Println("Task 1 - # calories of top elve \t =  ", task1(input))
-	fmt.Println("Task 2 - # cal sum of top 3 elves \t =  ", task2(input))
+	fmt.Println("Task 1 - # sum of priorities of double items \t =  ", task1(input))
+	fmt.Println("Task 2 - # sum of priorities of badges       \t =  ", task2(input))
 }
