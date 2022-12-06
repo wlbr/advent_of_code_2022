@@ -9,12 +9,12 @@ import (
 	"strconv"
 )
 
-type maxgroup struct {
+type sortedgroup struct {
 	cals      []int
 	groupsize int
 }
 
-func (m *maxgroup) add(c int) {
+func (m *sortedgroup) add(c int) {
 	if len(m.cals) < m.groupsize {
 		m.cals = append(m.cals, c)
 		sort.Ints(m.cals)
@@ -26,7 +26,7 @@ func (m *maxgroup) add(c int) {
 	}
 }
 
-func (m *maxgroup) sum() (sum int) {
+func (m *sortedgroup) sum() (sum int) {
 	for _, c := range m.cals {
 		sum += c
 	}
@@ -43,7 +43,7 @@ func calsummer(input string, groupsize int) (groupcal int) {
 	scanner := bufio.NewScanner(f)
 
 	var partsum int
-	mx := &maxgroup{groupsize: groupsize}
+	mx := &sortedgroup{groupsize: groupsize}
 	for scanner.Scan() {
 		line := scanner.Text()
 		c, err := strconv.Atoi(line)

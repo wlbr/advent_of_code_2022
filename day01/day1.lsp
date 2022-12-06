@@ -10,10 +10,11 @@
       (loop for line = (read-line x nil)
         while line do 
         (if (string= "" line)
-            (progn (if (> groupsize (length max))
-                       (setq max (cons partsum max))
-                       (let ((pos (position partsum max :test #'(lambda (x y) (> x y)))))
-                         (when pos (setf (nth pos max) partsum))))
+            (progn 
+              (if (> groupsize (length max))
+                  (setq max (cons partsum max))
+                  (let ((pos (position partsum max :test #'(lambda (x y) (> x y)))))
+                    (when pos (setf (nth pos max) partsum))))
               (setq max (sort max #'<))
               (setq partsum 0))
             (incf partsum (parse-integer line))))
