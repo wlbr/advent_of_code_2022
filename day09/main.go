@@ -29,31 +29,8 @@ func sign(a int) int {
 	return 1
 }
 
-type direction int
-
-func (d direction) String() string {
-	switch d {
-	case NORTH:
-		return "U"
-	case SOUTH:
-		return "D"
-	case EAST:
-		return "R"
-	case WEST:
-		return "L"
-	}
-	return "UNKNOWN"
-}
-
-const (
-	NORTH direction = iota
-	SOUTH
-	EAST
-	WEST
-)
-
 type motion struct {
-	dir      direction
+	dir      string
 	distance int
 }
 
@@ -68,22 +45,10 @@ func readInput(fname string) (motions []*motion) {
 	}
 	defer f.Close()
 
-	var cmds string
+	var cmd string
 	var dis int
-	for _, end := fmt.Fscanf(f, "%s %d", &cmds, &dis); end != io.EOF; _, end = fmt.Fscanf(f, "%s %d", &cmds, &dis) {
-		var cmd direction
-		switch cmds {
-		case "U":
-			cmd = NORTH
-		case "D":
-			cmd = SOUTH
-		case "R":
-			cmd = EAST
-		case "L":
-			cmd = WEST
-		default:
-			log.Fatalf("Unknown motion '%s'", cmds)
-		}
+	for _, end := fmt.Fscanf(f, "%s %d", &cmd, &dis); end != io.EOF; _, end = fmt.Fscanf(f, "%s %d", &cmd, &dis) {
+
 		motions = append(motions, &motion{cmd, dis})
 	}
 
@@ -123,13 +88,13 @@ func follow(currentTail, currentHead point) (newTail point) {
 
 func moveHead(rope []point, cmd *motion) {
 	switch cmd.dir {
-	case NORTH:
+	case "U":
 		rope[0].y++
-	case SOUTH:
+	case "D":
 		rope[0].y--
-	case EAST:
+	case "R":
 		rope[0].x++
-	case WEST:
+	case "L":
 		rope[0].x--
 	}
 }
