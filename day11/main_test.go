@@ -13,7 +13,6 @@ type testdata struct {
 var testset []*testdata = []*testdata{{"example.txt", 10605, 2713310158}}
 
 func TestTaskOne(t *testing.T) {
-
 	for _, test := range testset {
 		r := task1(test.fname)
 		if r != test.expectedtask1 {

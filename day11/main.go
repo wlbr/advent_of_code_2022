@@ -219,6 +219,10 @@ func readInput(fname string) (monkeys []*monkey) {
 func monkeybusiness(monkeys []*monkey, relief, rounds int) int {
 
 	var worrylevel int
+	bigDivisor := 1
+	for _, m := range monkeys {
+		bigDivisor *= m.decision.arg
+	}
 
 	for i := 0; i < rounds; i++ {
 		for _, m := range monkeys {
@@ -226,7 +230,11 @@ func monkeybusiness(monkeys []*monkey, relief, rounds int) int {
 				if len(m.items) > 0 {
 					m.inspections++
 					worrylevel = m.operation.Execute(m.items[0])
-					worrylevel = worrylevel / relief
+					if relief > 1 {
+						worrylevel = worrylevel / relief
+					} else {
+						worrylevel = worrylevel % bigDivisor
+					}
 					m.items[0] = worrylevel
 					item := m.items[0]
 					if m.decision.Execute(item) {
