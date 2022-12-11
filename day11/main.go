@@ -1,13 +1,10 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"log"
-	"os"
 	"sort"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -130,92 +127,6 @@ func (m *monkey) Swap(othermonkey *monkey) bool {
 	return m.items[0] < othermonkey.items[0]
 }
 
-func readInput(fname string) (monkeys []*monkey) {
-	f, err := os.Open(fname)
-	if err != nil {
-		log.Fatalf("Error opening dataset '%s':  %s", fname, err)
-	}
-	defer f.Close()
-
-	tmpmonkeys := make(map[int]*monkey)
-
-	scanner := bufio.NewScanner(f)
-	// optionally, resize scanner's capacity for lines over 64K, see next example
-	for scanner.Scan() {
-		m := monkey{}
-
-		line := scanner.Text()
-		if line == "" {
-			scanner.Scan()
-			line = scanner.Text()
-		}
-		_, end := fmt.Sscanf(line, "Monkey %d:\n", &m.id)
-		if end != nil {
-			log.Fatal("Error parsing monkey)")
-		}
-
-		scanner.Scan()
-		line = scanner.Text()
-		for _, item := range strings.Split(strings.Split(line, ":")[1], ",") {
-			iitem, err := strconv.Atoi(strings.Trim(item, " "))
-			if err != nil {
-				log.Fatalf("Error parsing item '%s': %s", item, err)
-			}
-			m.items = append(m.items, iitem)
-		}
-
-		scanner.Scan()
-		line = scanner.Text()
-		var ops, arg string
-		_, end = fmt.Sscanf(line, "  Operation: new = old %s %s\n", &ops, &arg)
-		if end != nil {
-			log.Fatalf("Error parsing monkey: %s", end)
-		}
-		m.operation = NewOperation(ops, arg)
-
-		scanner.Scan()
-		line = scanner.Text()
-		var dec string
-		var decarg, truetarget, falsetarget int
-		_, end = fmt.Sscanf(line, "  Test: %s by %d\n", &dec, &decarg)
-		if end != nil {
-			log.Fatal("Error parsing monkey", end)
-		}
-
-		scanner.Scan()
-		line = scanner.Text()
-		_, end = fmt.Sscanf(line, "  If true: throw to monkey %d\n", &truetarget)
-		if end != nil {
-			log.Fatal("Error parsing monkey", end)
-		}
-
-		scanner.Scan()
-		line = scanner.Text()
-		_, end = fmt.Sscanf(line, "  If false: throw to monkey %d\n", &falsetarget)
-		if end != nil {
-			log.Fatal("Error parsing monkey)")
-		}
-		m.decision = NewDecision(dec, decarg, truetarget, falsetarget)
-		tmpmonkeys[m.id] = &m
-	}
-
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
-
-	max := 0
-	for _, m := range tmpmonkeys {
-		if m.id > max {
-			max = m.id
-		}
-	}
-	monkeys = make([]*monkey, max+1)
-	for _, m := range tmpmonkeys {
-		monkeys[m.id] = m
-	}
-
-	return monkeys
-}
 func monkeybusiness(monkeys []*monkey, relief, rounds int) int {
 
 	var worrylevel int
@@ -271,8 +182,8 @@ func main() {
 	t2 := task2(input)
 	afterTask2 := time.Now()
 
-	fmt.Println("Task 1 - positions visited by the tail of 2   =  ", t1)
-	fmt.Printf("Task 2 - chars are: %d \n\n", t2)
+	fmt.Printf("Task 1 - after 20 round    \t:  %d \n", t1)
+	fmt.Printf("Task 2 - after 10000 rounds \t: %d \n\n", t2)
 
 	fmt.Println("Time task 1: ", afterTask1.Sub(startOverall))
 	fmt.Println("Time task 2: ", afterTask2.Sub(afterTask1))
