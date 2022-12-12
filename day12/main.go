@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"time"
 
 	astar "github.com/beefsack/go-astar"
@@ -42,42 +43,47 @@ func (p *point) ManhattanDistance(to *point) float64 {
 	return float64(abs(p.x-to.x) + abs(p.y-to.y))
 }
 
-func addPointToAdjacents(p *point, adj *[]astar.Pather) {
-	if p != nil && p != p.board.start {
-		*adj = append(*adj, p)
+func (p *point) EuklidianDistance(to *point) float64 {
+	d := &point{x: p.x - to.x, y: p.y - to.y}
+	return math.Sqrt(float64(d.x*d.x + d.y*d.y))
+}
+
+func (p *point) checkAndAddPointToAdjacents(other *point, adj *[]astar.Pather) {
+	if other != nil && other != p.board.start &&
+		abs(p.value-other.value) <= 1 {
+		*adj = append(*adj, other)
 	}
 }
 
 func (p *point) PathNeighbors() []astar.Pather {
 	var adj []astar.Pather
 
-	if p.x > 0 && abs(p.value-p.board.points[p.y][p.x-1].value) <= 1 {
-		addPointToAdjacents(p.board.points[p.y][p.x-1], &adj)
+	if p.x > 0 {
+		p.checkAndAddPointToAdjacents(p.board.points[p.y][p.x-1], &adj)
 	}
-	if p.x < p.board.dimx-1 && abs(p.value-p.board.points[p.y][p.x+1].value) <= 1 {
-		adj = append(adj, p.board.points[p.y][p.x+1])
+	if p.x < p.board.dimx-1 {
+		p.checkAndAddPointToAdjacents(p.board.points[p.y][p.x+1], &adj)
 	}
-	if p.y > 0 && abs(p.value-p.board.points[p.y-1][p.x].value) <= 1 {
-		adj = append(adj, p.board.points[p.y-1][p.x])
+	if p.y > 0 {
+		p.checkAndAddPointToAdjacents(p.board.points[p.y-1][p.x], &adj)
 	}
-	if p.y < p.board.dimy-1 && abs(p.value-p.board.points[p.y+1][p.x].value) <= 1 {
-		adj = append(adj, p.board.points[p.y+1][p.x])
+	if p.y < p.board.dimy-1 {
+		p.checkAndAddPointToAdjacents(p.board.points[p.y+1][p.x], &adj)
 	}
 
-	for _, a := range adj {
-		fmt.Printf("%s - %s=%f ", p, a, p.ManhattanDistance(a.(*point)))
-	}
-	fmt.Println()
+	// for _, a := range adj {
+	// 	fmt.Printf("%s - %s=%f ", p, a, p.ManhattanDistance(a.(*point)))
+	// }
 	return adj
 }
 
-func (t *point) PathNeighborCost(to astar.Pather) float64 {
-	tor := to.(*point)
-	return float64(tor.value)
+func (p *point) PathNeighborCost(to astar.Pather) float64 {
+	top := to.(*point)
+	return float64(abs(p.value - top.value))
 }
 
-func (t *point) PathEstimatedCost(to astar.Pather) float64 {
-	return t.ManhattanDistance(to.(*point))
+func (p *point) PathEstimatedCost(to astar.Pather) float64 {
+	return p.ManhattanDistance(to.(*point))
 }
 
 type board struct {
@@ -125,7 +131,6 @@ func task1(fname string) int {
 	path, _, found := astar.Path(b.start, b.target)
 	if !found {
 		fmt.Println("No path found")
-		//	return -1
 	}
 	return len(path) - 1
 }
@@ -143,8 +148,8 @@ func main() {
 	t2 := task2(input)
 	afterTask2 := time.Now()
 
-	fmt.Printf("Task 1 - steps to target    \t:  %d \n", t1)
-	fmt.Printf("Task 2 - after 10000 rounds \t: %d \n\n", t2)
+	fmt.Printf("Task 1 - steps to target    \t: %d \n", t1)
+	fmt.Printf("Task 2 -                    \t: %d \n\n", t2)
 
 	fmt.Println("Time task 1: ", afterTask1.Sub(startOverall))
 	fmt.Println("Time task 2: ", afterTask2.Sub(afterTask1))
