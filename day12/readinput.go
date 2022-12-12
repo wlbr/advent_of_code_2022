@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func readInput(fname string) (board *board) {
+func readInput(fname string) *board {
 	f, err := os.Open(fname)
 	if err != nil {
 		log.Fatalf("Error opening dataset '%s':  %s", fname, err)
@@ -14,7 +14,7 @@ func readInput(fname string) (board *board) {
 	defer f.Close()
 
 	scanner := bufio.NewScanner(f)
-	board = NewBoard()
+	board := &board{}
 	var y int
 	for scanner.Scan() {
 		line := scanner.Text()

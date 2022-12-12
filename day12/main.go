@@ -18,25 +18,23 @@ func abs(x int) int {
 type point struct {
 	x     int
 	y     int
-	value int
 	char  rune
 	board *board
 }
 
 func NewPoint(x, y int, board *board, char rune) *point {
 	p := point{x: x, y: y, board: board, char: char}
-	p.value = int(char) - 'a' + 1
 	switch p.char {
 	case 'S':
-		p.value = 0
+		p.char = 'a'
 	case 'E':
-		p.value = int('z') - 'a' + 2
+		p.char = 'z'
 	}
 	return &p
 }
 
 func (p *point) String() string {
-	return fmt.Sprintf("[%d,%d]=%c(%d)", p.x, p.y, p.char, p.value)
+	return fmt.Sprintf("[%d,%d]=%c", p.x, p.y, p.char)
 }
 
 func (p *point) ManhattanDistance(to *point) float64 {
@@ -44,13 +42,57 @@ func (p *point) ManhattanDistance(to *point) float64 {
 }
 
 func (p *point) EuklidianDistance(to *point) float64 {
-	d := &point{x: p.x - to.x, y: p.y - to.y}
-	return math.Sqrt(float64(d.x*d.x + d.y*d.y))
+	x := p.x - to.x
+	y := p.y - to.y
+	return math.Sqrt(float64(x*x + y*y))
+}
+
+func (p *point) HeightDistance(to *point) float64 {
+	var x, endx int
+	dx := to.x - p.x
+	if dx > 0 {
+		x = p.x
+		endx = to.x
+		dx = 1
+	} else if dx < 0 {
+		x = to.x
+		endx = p.x
+		dx = 1
+	}
+	var y, endy int
+	dy := to.y - p.y
+	if dy > 0 {
+		y = p.y
+		endy = to.y
+		dy = 1
+	} else if dy < 0 {
+		y = to.y
+		endy = p.y
+		dy = 1
+	}
+	var slope int
+	for {
+		moved := false
+		if x != endx {
+			x += dx
+			moved = true
+		}
+		if y != endy {
+			y += dy
+			moved = true
+		}
+		if x > 0 && x < p.board.dimx && y >= 0 && y < p.board.dimy {
+			slope += int(p.board.points[y][x].char)
+		}
+		if !moved {
+			break
+		}
+	}
+	return float64(slope)
 }
 
 func (p *point) checkAndAddPointToAdjacents(other *point, adj *[]astar.Pather) {
-	if other != nil && other != p.board.start &&
-		abs(p.value-other.value) <= 1 {
+	if other.char-p.char <= 1 {
 		*adj = append(*adj, other)
 	}
 }
@@ -71,19 +113,19 @@ func (p *point) PathNeighbors() []astar.Pather {
 		p.checkAndAddPointToAdjacents(p.board.points[p.y+1][p.x], &adj)
 	}
 
-	// for _, a := range adj {
-	// 	fmt.Printf("%s - %s=%f ", p, a, p.ManhattanDistance(a.(*point)))
-	// }
 	return adj
 }
 
 func (p *point) PathNeighborCost(to astar.Pather) float64 {
 	top := to.(*point)
-	return float64(abs(p.value - top.value))
+	return float64(abs(int(p.char - top.char)))
 }
 
 func (p *point) PathEstimatedCost(to astar.Pather) float64 {
-	return p.ManhattanDistance(to.(*point))
+	//c := p.HeightDistance(to.(*point))
+	//c := p.EuklidianDistance(to.(*point))
+	c := p.ManhattanDistance(to.(*point))
+	return c
 }
 
 type board struct {
@@ -93,36 +135,6 @@ type board struct {
 	target *point
 	dimx   int
 	dimy   int
-}
-
-func NewBoard() *board {
-	b := board{}
-	return &b
-}
-
-func (b *board) String() string {
-	s := ""
-	for _, line := range b.fields {
-		s += line + "\b"
-	}
-	return s
-}
-
-func (b *board) Get(x, y int) rune {
-	if x < 0 || x >= b.dimx || y < 0 || y >= b.dimy {
-		return '#'
-	}
-	return rune(b.fields[y][x])
-}
-
-func (b *board) Val(x, y int) (value int, isTarget bool) {
-	if x < 0 || x >= b.dimx || y < 0 || y >= b.dimy {
-		return -1, false
-	}
-	if b.fields[y][x] == 'E' {
-		return 0, true
-	}
-	return b.points[y][x].value, false
 }
 
 func task1(fname string) int {
