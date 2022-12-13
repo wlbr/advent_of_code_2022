@@ -10,7 +10,7 @@ type testdata struct {
 	expectedtask2 int
 }
 
-var testset []*testdata = []*testdata{{"example.txt", 31, 0}}
+var testset []*testdata = []*testdata{{"example.txt", 31, 29}}
 
 func TestTaskOne(t *testing.T) {
 	for _, test := range testset {
